@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension>
+	<_name>Batch PNG export</_name>
+	<id>id.knd.export.png</id>
+	<dependency type="executable" location="extensions">batchexpng.py</dependency>
+	<param name="help" type="description">Select export directory, DPI and other options.</param>
+	<param name="dpi" type="int" min="1" max="900"  _gui-text="export DPI">320</param>
+	<param name="path" type="string"  _gui-text="export directory path">~</param>
+	<param name="usefolders" type="boolean" _gui-text="treat layers as folders">false</param>
+	<param name="adddpi" type="boolean" _gui-text="add DPI to export path">1</param>
+	<effect needs-live-preview="false">
+		<object-type>all</object-type>
+		<effects-menu>
+			<submenu _name="Export" />
+		</effects-menu>
+	</effect>
+	<script>
+		<command reldir="extensions" interpreter="python">batchexpng.py</command>
+	</script>
+</inkscape-extension>

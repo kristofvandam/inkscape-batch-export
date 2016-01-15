@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension>
+	<_name>Batch SVG export</_name>
+	<id>id.knd.export.svg</id>
+	<dependency type="executable" location="extensions">batchexsvg.py</dependency>
+	<param name="help" type="description">Please select the area of the drawing that you wish to export and specify export path</param>
+	<param name="path" type="string"  _gui-text="export directory path">~</param>
+	<param name="usefolders" type="boolean" _gui-text="treat layers as directories">false</param>
+	<effect needs-live-preview="false">
+		<object-type>all</object-type>
+		<effects-menu>
+			<submenu _name="Export" />
+		</effects-menu>
+	</effect>
+	<script>
+		<command reldir="extensions" interpreter="python">batchexsvg.py</command>
+	</script>
+</inkscape-extension>
