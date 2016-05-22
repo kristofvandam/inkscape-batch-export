@@ -6,6 +6,10 @@ import os
 from simplestyle import *
 from lxml import etree
 
+import gettext
+_ = gettext.gettext
+from subprocess import Popen, PIPE
+
 sys.path.append('/usr/share/inkscape/extensions')
 
 class BatchExSVG(inkex.Effect):
@@ -16,6 +20,9 @@ class BatchExSVG(inkex.Effect):
 
 	def effect(self):
 		svg_root = self.document.getroot()
+		canvas_width  = self.unittouu(svg_root.get('width'))
+		canvas_height = self.unittouu(svg_root.attrib['height'])
+
 		children = svg_root.getchildren()
 		path = self.options.path
 		use_folders = self.options.use_folders
@@ -53,24 +60,43 @@ class BatchExSVG(inkex.Effect):
 				if use_folders:
 					filename = path + "/" + layername + "/" + childname + ".svg"
 				content = inkex.etree.tostring( lchild )
+
+				q = {'x':0, 'y':0, 'width':0, 'height':0}
+				for query in q.keys():
+					p = Popen(
+						'inkscape --query-%s --query-id=%s "%s"' % (query, childname, self.args[-1], ),
+						shell=True,
+						stdout=PIPE,
+						stderr=PIPE,
+					)
+					p.wait()
+					q[query] = p.stdout.read()
+
+				# get width, height, center of bounding box 
+				obj_width = float(q['width'])
+				obj_height = float(q['height'])
+				center_x = float(q['x'])
+				center_y = float(q['y'])
+
+
 				#sys.stderr.write( content )
-				'''# get dimensions
-				x = self.unittouu( lchild.get('x') )
-				y = self.unittouu( lchild.get('y') )
-				w = self.unittouu( lchild.get('width') )
-				h = self.unittouu( lchild.get('height') )
-				# dimensions for future document, in units
-				uw = self.uutounit( w, 'mm' )
-				uh = self.uutounit( h, 'mm' ) '''
+				# get dimensions
+				# x = lchild.get('x') #self.unittouu( lchild.get('x') )
+				# y = self.unittouu( lchild.get('y') )
+				# w = self.unittouu( lchild.get('width') )
+				# h = self.unittouu( lchild.get('height') )
+				# # dimensions for future document, in units
+				# uw = self.uutounit( w, 'mm' )
+				# uh = self.uutounit( h, 'mm' )
 				#sys.stderr.write( "Exporting " + tag + " to " + filename + "\n" )
 				# start export
 				exsvg = open(filename,'w')
 				exsvg.write('<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n')
 				exsvg.write('<svg\n')
-				'''new_svg.write('width="' + str(uw) + 'mm"\n')
-				new_svg.write('height="' + str(uh) + 'mm"\n')
-				new_svg.write('viewBox="' + str(x) + ' ' + str(y) + ' ' + str(w) + ' ' + str(h) + '"\n')
-				new_svg.write('sodipodi:docname="' + name + '.svg">\n')'''
+				exsvg.write('width="' + str(obj_width) + 'mm"\n')
+				exsvg.write('height="' + str(obj_height) + 'mm"\n')
+				exsvg.write('viewBox="' + str(center_x) + ' ' + str(center_y) + ' ' + str(obj_width) + ' ' + str(obj_height) + '"\n')
+				# exsvg.write('sodipodi:docname="' + name + '.svg">\n')
 				exsvg.write('>\n')
 				#write definitions
 				if None != defs:
